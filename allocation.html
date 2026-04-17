@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Budget Allocation | SCC</title>
+    <script>
+        const savedTheme = localStorage.getItem('scc_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/layout.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <style>
+        .allocation-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .alloc-input { display: flex; flex-direction: column; text-align: left; }
+        .alloc-input label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.3rem; }
+        .input-wrapper { position: relative; }
+        
+        .alloc-val {
+            width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            padding: 0.8rem 2rem 0.8rem 1rem; font-size: 1.2rem; background: var(--bg-surface);
+            color: var(--text-primary); font-family: var(--font-family); font-weight: 600; transition: 0.2s;
+        }
+        .alloc-val:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px var(--accent-light); }
+        .percent-symbol { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-weight: 600; }
+        
+        #total-check { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem; padding: 0.5rem; border-radius: var(--radius-md); text-align: center; }
+        .valid-total { color: var(--success); background: rgba(16, 185, 129, 0.1); }
+        .invalid-total { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+    </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <main class="container">
+            <div class="card fade-in" style="margin-top: 2vh; border:none; box-shadow:none; background:transparent;">
+                <div class="card-header" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚖️</div>
+                    <h2>Divide & Conquer</h2>
+                    <p style="margin-top:0.5rem;">Allocate 100% of your funds. The 50/30/20 rule is standard, but you're in charge.</p>
+                </div>
+                
+                <form id="allocation-form" class="card">
+                    <div class="allocation-grid">
+                        <div class="alloc-input">
+                            <label>Needs (Food/Rent)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="needs" value="50" min="0" max="100" class="alloc-val" required>
+                                <span class="percent-symbol">%</span>
+                            </div>
+                        </div>
+                        <div class="alloc-input">
+                            <label>Wants (Fun)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="wants" value="30" min="0" max="100" class="alloc-val" required>
+                                <span class="percent-symbol">%</span>
+                            </div>
+                        </div>
+                        <div class="alloc-input">
+                            <label>Savings</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="savings" value="10" min="0" max="100" class="alloc-val" required>
+                                <span class="percent-symbol">%</span>
+                            </div>
+                        </div>
+                        <div class="alloc-input">
+                            <label>Investments</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="investments" value="10" min="0" max="100" class="alloc-val" required>
+                                <span class="percent-symbol">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="total-check" class="valid-total">Total: 100%</div>
+                    
+                    <button type="submit" id="submit-btn" class="btn-primary">
+                        Lock It In →
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="scripts/storage.js"></script>
+    <script src="scripts/allocation.js"></script>
+</body>
+</html>

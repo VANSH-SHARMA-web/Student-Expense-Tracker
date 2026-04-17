@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Setup | Student Cash Coach</title>
+    <script>
+        const savedTheme = localStorage.getItem('scc_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/layout.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <style>
+        .setup-container {
+            display: flex; flex-direction: column; justify-content: center; min-height: 70vh;
+        }
+        .emoji-icon { font-size: 3rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <main class="container setup-container">
+            <div class="card fade-in" style="text-align: center; border: none; box-shadow: none; background: transparent;">
+                <div class="card-header">
+                    <div class="emoji-icon">💸</div>
+                    <h1>Welcome, Founder!</h1>
+                    <p style="margin-top: 0.5rem;">Let's map out your monthly runway. How much pocket money are you working with this month?</p>
+                </div>
+                
+                <form id="setup-form" class="setup-form" style="margin-top: 2rem;">
+                    <div class="input-group" style="position: relative;">
+                        <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.5rem; color: var(--text-secondary); font-weight: 600;">₹</span>
+                        <input type="number" id="pocket-money" class="input-flat" required placeholder="0.00" min="1" step="any" autofocus style="text-align: center; font-size: 2rem; padding: 1.5rem; font-weight: 700;">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" style="margin-top: 1rem;">
+                        Start Planning →
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="scripts/storage.js"></script>
+    <script src="scripts/app.js"></script>
+</body>
+</html>

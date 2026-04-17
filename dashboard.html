@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard | Student Cash Coach</title>
+    <script>
+        document.documentElement.setAttribute('data-theme', localStorage.getItem('scc_theme') || 'light');
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/layout.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .header-title { padding: 1rem 0; font-size: 1.5rem; }
+        
+        .balance-hero { text-align: center; padding: 1.5rem 0; }
+        .bal-label { color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;}
+        .bal-amount { font-size: 3.5rem; font-weight: 800; color: var(--text-primary); letter-spacing: -1.5px; margin: 0.2rem 0; }
+        
+        .daily-pill {
+            display: inline-flex; align-items: center; gap: 0.5rem; background: var(--accent-light); color: var(--accent-primary);
+            padding: 0.5rem 1rem; border-radius: 100px; font-weight: 600; font-size: 0.9rem;
+        }
+        .daily-pill.danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        .analytics-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1.5rem; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 0.3rem;}
+        .stat-bar-bg { width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; background: var(--accent-primary); border-radius: 4px; transition: width 0.5s ease;}
+        
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+        .history-item:last-child { border-bottom: none; }
+        .h-note { font-weight: 600; font-size: 1.1rem; color: var(--text-primary); }
+        .h-cat { color: var(--text-secondary); font-size: 0.85rem; }
+        .h-amt { font-weight: 700; font-size: 1.1rem; }
+
+        .snark-text { font-style: italic; font-size: 0.9rem; margin-top: 0.5rem; color: var(--text-secondary); }
+        
+        /* Goal Progress styling */
+        .goal-bar-bg { width: 100%; height: 16px; background: var(--border-color); border-radius: 8px; margin: 0.8rem 0; overflow: hidden; position: relative; }
+        .goal-bar-fill { height: 100%; background: linear-gradient(90deg, #10B981, #059669); transition: width 1s ease-out; }
+    </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <div id="app-toast" class="toast">
+            <span id="toast-icon">⚠️</span> <span id="toast-msg">Notification</span>
+        </div>
+
+        <main class="container">
+            <!-- 🏠 HOME VIEW -->
+            <section id="view-home" class="spa-view active">
+                <header class="header-title">Home</header>
+                
+                <div class="balance-hero">
+                    <div class="bal-label">Safe to Spend</div>
+                    <div class="bal-amount" id="home-balance">₹0.00</div>
+                    <div class="daily-pill" id="home-daily-limit">
+                        <span>Daily Limit:</span><strong id="home-daily-amt">₹0</strong>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <h3 style="font-size: 1.1rem;">AI Financial Health</h3>
+                    </div>
+                    <div class="health-widget">
+                        <div class="health-grade grade-A" id="health-grade">A</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 1.2rem;" id="health-title">Excellent</div>
+                            <div class="snark-text" id="health-snark">"Founders don't overspend."</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Savings Goal Widget -->
+                <div class="card" id="savings-widget">
+                    <!-- Injected by JS -->
+                </div>
+
+                <h3 style="font-size: 1rem; margin-top: 2rem; color: var(--text-secondary);">Recent Activity</h3>
+                <div class="card" id="mini-history" style="padding: 0.5rem 1.5rem;"></div>
+            </section>
+
+            <!-- 📊 ANALYTICS / VIEW -->
+            <section id="view-analytics" class="spa-view">
+                <header class="header-title">Insights</header>
+                
+                <div class="card" style="position: relative; height: 250px; display: flex; justify-content: center; align-items: center; padding: 10px;">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+                
+                <h3 style="font-size: 1rem; margin-top: 2rem; color: var(--text-secondary);">Category Pacing</h3>
+                <div class="analytics-grid" id="analytics-categories" style="margin-bottom: 2rem;"></div>
+
+                <!-- Subscriptions Engine -->
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 2rem;">
+                    <h3 style="font-size: 1rem; color: var(--text-secondary);">Recurring Subs (Ghost Tax)</h3>
+                    <span id="total-subs-text" style="font-weight: 600; font-size: 0.9rem; color: var(--danger);"></span>
+                </div>
+                
+                <div class="card" style="margin-top: 0.5rem; padding: 1rem;">
+                    <form id="subs-form" onsubmit="event.preventDefault();" style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <input type="text" id="sub-name" class="input-flat" placeholder="Netflix" required style="padding: 0.5rem; font-size: 0.9rem;">
+                        <input type="number" id="sub-amt" class="input-flat" placeholder="₹199" required min="1" step="any" style="padding: 0.5rem; width: 30%; font-size: 0.9rem;">
+                        <button type="submit" class="btn-primary" style="padding: 0.5rem; width: auto;">+</button>
+                    </form>
+                    <div id="subs-list"></div>
+                </div>
+            </section>
+
+            <!-- ➕ ADD EXPENSE VIEW -->
+            <section id="view-add" class="spa-view">
+                <header class="header-title">Add Expense</header>
+                <form id="expense-form" onsubmit="event.preventDefault();" class="card" style="margin-top: 1rem;">
+                    <div class="input-group">
+                        <label>Amount (₹)</label>
+                        <input type="number" id="exp-amount" class="input-flat" placeholder="0.00" required min="1" step="any">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Category</label>
+                        <select id="exp-category" class="input-flat" required>
+                            <option value="Needs">Needs</option>
+                            <option value="Wants">Wants</option>
+                            <option value="Savings">Savings</option>
+                            <option value="Investments">Investments</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 2rem;">
+                        <label>Note</label>
+                        <input type="text" id="exp-note" class="input-flat" placeholder="What was it?" required>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="log-exp-btn">Log Expense</button>
+                </form>
+            </section>
+
+            <!-- 🕒 HISTORY VIEW -->
+            <section id="view-history" class="spa-view">
+                <header class="header-title">All Activity</header>
+                <div class="card" id="full-history-list" style="padding: 0 1.5rem;"></div>
+            </section>
+
+            <!-- ⚙️ SETTINGS VIEW -->
+            <section id="view-settings" class="spa-view">
+                <header class="header-title">Settings</header>
+                <div class="card">
+                    <div class="theme-switch-wrapper">
+                        <div>
+                            <div style="font-weight: 600;">Dark Mode</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Ease eye strain</div>
+                        </div>
+                        <label class="theme-switch" for="theme-toggle">
+                            <input type="checkbox" id="theme-toggle" />
+                            <div class="slider-round"></div>
+                        </label>
+                    </div>
+                    <div style="padding: 1.5rem 0;">
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--danger);">Danger Zone</div>
+                        <button id="reset-btn" class="btn-danger">Erase All Data</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-target="view-home"><span class="icon">🏠</span><span>Home</span></button>
+            <button class="nav-item" data-target="view-analytics"><span class="icon">📊</span><span>Insight</span></button>
+            <div class="nav-fab-container"><button class="nav-fab" data-target="view-add"><span class="icon">+</span></button></div>
+            <button class="nav-item" data-target="view-history"><span class="icon">🕒</span><span>History</span></button>
+            <button class="nav-item" data-target="view-settings"><span class="icon">⚙️</span><span>Settings</span></button>
+        </nav>
+    </div>
+
+    <script src="scripts/storage.js"></script>
+    <script src="scripts/dashboard.js"></script>
+</body>
+</html>

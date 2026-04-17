@@ -1,0 +1,108 @@
+/* Cards */
+.card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: background 0.3s, border-color 0.3s;
+}
+
+.card-header { margin-bottom: 1rem; }
+
+/* Forms & Inputs */
+.input-group { margin-bottom: 1rem; }
+.input-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); }
+
+.input-flat {
+    width: 100%;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-family: var(--font-family);
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+.input-flat:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: var(--bg-surface);
+    box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+/* Clean UI Number Drop */
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { appearance: textfield; }
+
+/* Buttons */
+.btn-primary {
+    background: var(--accent-primary);
+    color: var(--btn-text);
+    border: none;
+    padding: 1rem 1.5rem;
+    width: 100%;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: background 0.2s;
+}
+.btn-primary:active { transform: translateY(1px); }
+.btn-primary:hover { background: var(--accent-hover); }
+
+.btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    padding: 1rem 1.5rem;
+    width: 100%;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: var(--font-family);
+}
+.btn-danger:hover { background: rgba(239, 68, 68, 0.1); }
+
+/* Health Score Widget */
+.health-widget {
+    display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); transition: background 0.3s;
+}
+.health-grade { display: flex; justify-content: center; align-items: center; width: 60px; height: 60px; border-radius: 50%; font-size: 2rem; font-weight: 700; transition: color 0.3s, background 0.3s;}
+.grade-A { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+.grade-B { background: var(--accent-light); color: var(--accent-primary); }
+.grade-C { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+.grade-D { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+/* iOS style Toggle Switch */
+.theme-switch-wrapper {
+    display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 1rem 0; border-bottom: 1px solid var(--border-color);
+}
+.theme-switch {
+    position: relative; display: inline-block; width: 50px; height: 28px;
+}
+.theme-switch input { opacity: 0; width: 0; height: 0; }
+.slider-round {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px;
+}
+.slider-round:before {
+    position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;
+}
+input:checked + .slider-round { background-color: var(--accent-primary); }
+input:checked + .slider-round:before { transform: translateX(22px); }
+
+/* Toasts */
+.toast {
+    position: fixed; top: 20px; left: 50%; transform: translate(-50%, -150%);
+    background: var(--text-primary); color: var(--bg-surface); padding: 1rem 1.5rem;
+    border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+    z-index: 1000; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex; align-items: center; gap: 0.8rem; width: 90%; max-width: 400px;
+}
+.toast.error { background: var(--danger); color: white;}
+.toast.show { transform: translate(-50%, 0); }
