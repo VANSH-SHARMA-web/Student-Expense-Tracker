@@ -70,6 +70,24 @@ const StorageCore = {
         }
     },
 
+    deleteExpense: function(id) {
+        const data = this.getData();
+        if (data) {
+            data.expenses = data.expenses.filter(e => e.id !== id);
+            localStorage.setItem(this.DB_KEY, JSON.stringify(data));
+        }
+    },
+
+    resetMonthlyExpenses: function() {
+        const data = this.getData();
+        if (data) {
+            data.expenses = [];
+            data.savingsGoal = null;
+            data.setupDate = new Date().toISOString();
+            localStorage.setItem(this.DB_KEY, JSON.stringify(data));
+        }
+    },
+
     resetData: function() { localStorage.removeItem(this.DB_KEY); },
 
     getSummary: function() {

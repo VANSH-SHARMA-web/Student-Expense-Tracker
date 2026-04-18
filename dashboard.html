@@ -30,17 +30,41 @@
         .stat-bar-bg { width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; }
         .stat-bar-fill { height: 100%; background: var(--accent-primary); border-radius: 4px; transition: width 0.5s ease;}
         
-        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border-color); transition: opacity 0.3s; }
         .history-item:last-child { border-bottom: none; }
         .h-note { font-weight: 600; font-size: 1.1rem; color: var(--text-primary); }
         .h-cat { color: var(--text-secondary); font-size: 0.85rem; }
         .h-amt { font-weight: 700; font-size: 1.1rem; }
+
+        .h-right { display: flex; align-items: center; gap: 0.8rem; }
+        .del-exp-btn { background: none; border: none; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+        .del-exp-btn:hover { color: var(--danger); background: rgba(239,68,68,0.08); }
 
         .snark-text { font-style: italic; font-size: 0.9rem; margin-top: 0.5rem; color: var(--text-secondary); }
         
         /* Goal Progress styling */
         .goal-bar-bg { width: 100%; height: 16px; background: var(--border-color); border-radius: 8px; margin: 0.8rem 0; overflow: hidden; position: relative; }
         .goal-bar-fill { height: 100%; background: linear-gradient(90deg, #10B981, #059669); transition: width 1s ease-out; }
+
+        /* Budget Overview */
+        .budget-overview { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-top: 1rem; }
+        .budget-stat { background: var(--bg-color); border-radius: var(--radius-md); padding: 0.8rem 0.5rem; text-align: center; }
+        .budget-stat .bs-val { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+        .budget-stat .bs-label { font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.2rem; }
+
+        /* About / Creator Card */
+        .creator-card { margin-top: 1.5rem; border-radius: var(--radius-lg); padding: 1.5rem; background: linear-gradient(135deg, var(--bg-surface) 0%, var(--accent-light) 100%); border: 1px solid var(--border-color); text-align: center; }
+        .creator-avatar { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; justify-content: center; align-items: center; font-size: 1.6rem; margin: 0 auto 0.8rem; box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+        .creator-name { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+        .creator-tagline { font-size: 0.8rem; color: var(--text-secondary); margin: 0.2rem 0 1rem; }
+        .creator-links { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+        .creator-link { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.9rem; border-radius: 100px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+        .creator-link:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .creator-link.email { background: rgba(239,68,68,0.1); color: #EF4444; }
+        .creator-link.linkedin { background: rgba(10,102,194,0.1); color: #0A66C2; }
+        .creator-link.github { background: rgba(30,30,30,0.08); color: var(--text-primary); }
+        [data-theme="dark"] .creator-link.github { background: rgba(255,255,255,0.08); }
+        .app-version { font-size: 0.7rem; color: var(--text-secondary); margin-top: 1rem; opacity: 0.7; }
     </style>
 </head>
 <body>
@@ -59,6 +83,23 @@
                     <div class="bal-amount" id="home-balance">₹0.00</div>
                     <div class="daily-pill" id="home-daily-limit">
                         <span>Daily Limit:</span><strong id="home-daily-amt">₹0</strong>
+                    </div>
+                </div>
+
+                <!-- Budget Overview Strip -->
+                <div class="card" style="padding: 1rem;">
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.2rem;">This Month</div>
+                    <div class="budget-overview">
+                        <div class="budget-stat"><div class="bs-val" id="bo-allowance">₹0</div><div class="bs-label">Budget</div></div>
+                        <div class="budget-stat"><div class="bs-val" id="bo-spent" style="color: var(--danger);">₹0</div><div class="bs-label">Spent</div></div>
+                        <div class="budget-stat"><div class="bs-val" id="bo-left" style="color: var(--success);">₹0</div><div class="bs-label">Left</div></div>
+                    </div>
+                    <div style="margin-top: 0.8rem;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.3rem;">
+                            <span>Spending Progress</span>
+                            <span id="bo-percent">0%</span>
+                        </div>
+                        <div class="stat-bar-bg" style="height: 6px;"><div id="bo-progress-bar" class="stat-bar-fill" style="width:0%;"></div></div>
                     </div>
                 </div>
 
@@ -142,6 +183,10 @@
             <!-- 🕒 HISTORY VIEW -->
             <section id="view-history" class="spa-view">
                 <header class="header-title">All Activity</header>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);" id="history-count"></span>
+                    <button id="export-csv-btn" style="background: var(--accent-light); color: var(--accent-primary); border: none; padding: 0.4rem 0.9rem; border-radius: 100px; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: var(--font-family);">⬇ Export CSV</button>
+                </div>
                 <div class="card" id="full-history-list" style="padding: 0 1.5rem;"></div>
             </section>
 
@@ -159,10 +204,38 @@
                             <div class="slider-round"></div>
                         </label>
                     </div>
+
+                    <!-- Budget Reset -->
+                    <div style="padding: 1rem 0; border-bottom: 1px solid var(--border-color);">
+                        <div style="font-weight: 600; margin-bottom: 0.3rem;">New Month?</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem;">Reset expenses &amp; keep your allocation and settings.</div>
+                        <button id="reset-month-btn" style="background: var(--accent-light); color: var(--accent-primary); border: none; padding: 0.8rem 1.2rem; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: var(--font-family); width: 100%;">🔄 Reset Month (Keep Settings)</button>
+                    </div>
+
+                    <!-- Export -->
+                    <div style="padding: 1rem 0; border-bottom: 1px solid var(--border-color);">
+                        <div style="font-weight: 600; margin-bottom: 0.3rem;">Export Data</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem;">Download all your expense history as a CSV file.</div>
+                        <button id="export-csv-btn-settings" style="background: rgba(16,185,129,0.1); color: var(--success); border: none; padding: 0.8rem 1.2rem; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: var(--font-family); width: 100%;">📥 Export to CSV</button>
+                    </div>
+
                     <div style="padding: 1.5rem 0;">
                         <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--danger);">Danger Zone</div>
                         <button id="reset-btn" class="btn-danger">Erase All Data</button>
                     </div>
+                </div>
+
+                <!-- Creator / About Card -->
+                <div class="creator-card">
+                    <div class="creator-avatar">👨‍💻</div>
+                    <div class="creator-name">Vansh Sharma</div>
+                    <div class="creator-tagline">Made with ❤️ for students who hustle</div>
+                    <div class="creator-links">
+                        <a href="mailto:vansharmaweb@gmail.com" class="creator-link email">✉️ Email</a>
+                        <a href="https://www.linkedin.com/in/vansharmaweb" target="_blank" rel="noopener" class="creator-link linkedin">💼 LinkedIn</a>
+                        <a href="https://github.com/vansharmaweb" target="_blank" rel="noopener" class="creator-link github">🐙 GitHub</a>
+                    </div>
+                    <div class="app-version">Student Cash Coach v2.0 • © 2026 Vansh Sharma</div>
                 </div>
             </section>
         </main>

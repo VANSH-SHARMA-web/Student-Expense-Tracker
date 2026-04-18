@@ -110,7 +110,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. Home View Injection
         document.getElementById('home-balance').innerText = formatMoney(summary.remainingBalance);
-        
+
+        // Budget Overview Strip
+        const spendPercent = summary.netAllowance > 0 ? Math.min((summary.totalSpent / summary.netAllowance) * 100, 100) : 0;
+        document.getElementById('bo-allowance').innerText = formatMoney(summary.netAllowance);
+        document.getElementById('bo-spent').innerText = formatMoney(summary.totalSpent);
+        document.getElementById('bo-left').innerText = formatMoney(Math.max(summary.remainingBalance, 0));
+        document.getElementById('bo-percent').innerText = Math.round(spendPercent) + '%';
+        const progressBar = document.getElementById('bo-progress-bar');
+        progressBar.style.width = spendPercent + '%';
+        progressBar.style.background = spendPercent > 100 ? 'var(--danger)' : spendPercent > 80 ? 'var(--warning)' : 'var(--accent-primary)';
+
         const dailyPill = document.getElementById('home-daily-limit');
         if (spentToday > safeDaily && safeDaily > 0) {
             dailyPill.classList.add('danger');
@@ -162,21 +172,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. Analytics & History Lists
         const sortedHistory = [...summary.expenses].sort((a,b) => new Date(b.date) - new Date(a.date));
-        const buildHistoryHTML = (list) => {
+        const buildHistoryHTML = (list, showDelete = false) => {
             if (list.length === 0) return `<div style="text-align:center; padding: 2rem 0; color: var(--text-secondary);">No transactions.</div>`;
             return list.map(exp => `
-                <div class="history-item">
+                <div class="history-item" id="exp-row-${exp.id}">
                     <div>
                         <div class="h-note">${exp.note}</div>
                         <div class="h-cat">${exp.category} • ${new Date(exp.date).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</div>
                     </div>
-                    <div class="h-amt" style="color: ${exp.category === 'Savings' || exp.category === 'Investments' ? 'var(--success)' : 'inherit'}">- ${formatMoney(exp.amount)}</div>
+                    <div class="h-right">
+                        <div class="h-amt" style="color: ${exp.category === 'Savings' || exp.category === 'Investments' ? 'var(--success)' : 'inherit'}">- ${formatMoney(exp.amount)}</div>
+                        ${showDelete ? `<button class="del-exp-btn" onclick="deleteExpense('${exp.id}')" title="Delete">🗑</button>` : ''}
+                    </div>
                 </div>
             `).join('');
         };
 
-        document.getElementById('mini-history').innerHTML = buildHistoryHTML(sortedHistory.slice(0, 3));
-        document.getElementById('full-history-list').innerHTML = buildHistoryHTML(sortedHistory);
+        document.getElementById('mini-history').innerHTML = buildHistoryHTML(sortedHistory.slice(0, 3), false);
+        const histCount = document.getElementById('history-count');
+        if (histCount) histCount.innerText = sortedHistory.length + ' transaction' + (sortedHistory.length !== 1 ? 's' : '');
+        document.getElementById('full-history-list').innerHTML = buildHistoryHTML(sortedHistory, true);
 
         // 4. Budget Limits Logic 
         const animGrid = document.getElementById('analytics-categories');
@@ -232,6 +247,49 @@ document.addEventListener('DOMContentLoaded', () => {
         StorageCore.deleteSubscription(id);
         renderApp();
     };
+
+    // Global expense delete hook
+    window.deleteExpense = function(id) {
+        const row = document.getElementById('exp-row-' + id);
+        if (row) row.style.opacity = '0';
+        setTimeout(() => {
+            StorageCore.deleteExpense(id);
+            renderApp();
+            showToast('Expense removed.');
+        }, 300);
+    };
+
+    // CSV Export helper
+    function exportCSV() {
+        const data = StorageCore.getData();
+        if (!data || data.expenses.length === 0) { showToast('No expenses to export.', true); return; }
+        const rows = [['Date', 'Category', 'Note', 'Amount (₹)']];
+        data.expenses.forEach(exp => {
+            rows.push([new Date(exp.date).toLocaleString(), exp.category, `"${exp.note.replace(/"/g,'""')}"`, exp.amount.toFixed(2)]);
+        });
+        const csv = rows.map(r => r.join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'expenses_' + new Date().toISOString().split('T')[0] + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('CSV downloaded! 📊');
+    }
+
+    // Wire up CSV export buttons
+    document.getElementById('export-csv-btn')?.addEventListener('click', exportCSV);
+    document.getElementById('export-csv-btn-settings')?.addEventListener('click', exportCSV);
+
+    // Monthly Reset
+    document.getElementById('reset-month-btn')?.addEventListener('click', () => {
+        if (confirm('Reset all expenses for a new month? Your allocations and settings will stay.')) {
+            StorageCore.resetMonthlyExpenses();
+            showToast('New month started! 🎉');
+            renderApp();
+        }
+    });
 
     function updateChart(totals) {
         const ctx = document.getElementById('expenseChart').getContext('2d');
